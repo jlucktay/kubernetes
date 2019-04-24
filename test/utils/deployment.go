@@ -151,14 +151,16 @@ func checkRollingUpdateStatus(c clientset.Interface, deployment *apps.Deployment
 	return "", nil
 }
 
-// Waits for the deployment to complete, and check rolling update strategy isn't broken at any times.
+// WaitForDeploymentCompleteAndCheckRolling waits for the deployment to complete, and checks that the rolling update
+// strategy isn't broken at any times.
 // Rolling update strategy should not be broken during a rolling update.
 func WaitForDeploymentCompleteAndCheckRolling(c clientset.Interface, d *apps.Deployment, logf LogfFn, pollInterval, pollTimeout time.Duration) error {
 	rolling := true
 	return waitForDeploymentCompleteMaybeCheckRolling(c, d, rolling, logf, pollInterval, pollTimeout)
 }
 
-// Waits for the deployment to complete, and don't check if rolling update strategy is broken.
+// WaitForDeploymentComplete waits for the deployment to complete, and doesn't check if the rolling update strategy is
+// broken.
 // Rolling update strategy is used only during a rolling update, and can be violated in other situations,
 // such as shortly after a scaling event or the deployment is just created.
 func WaitForDeploymentComplete(c clientset.Interface, d *apps.Deployment, logf LogfFn, pollInterval, pollTimeout time.Duration) error {
@@ -238,7 +240,7 @@ func checkRevisionAndImage(deployment *apps.Deployment, newRS *apps.ReplicaSet, 
 		return fmt.Errorf("deployment %q doesn't have the required image %s set", deployment.Name, image)
 	}
 	if !containsImage(newRS.Spec.Template.Spec.Containers, image) {
-		return fmt.Errorf("new replica set %q doesn't have the required image %s.", newRS.Name, image)
+		return fmt.Errorf("new replica set %q doesn't have the required image %s", newRS.Name, image)
 	}
 	return nil
 }

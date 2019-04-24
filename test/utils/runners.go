@@ -77,7 +77,7 @@ func WaitUntilPodIsScheduled(c clientset.Interface, name, namespace string, time
 			return p, nil
 		}
 	}
-	return nil, fmt.Errorf("Timed out after %v when waiting for pod %v/%v to start.", timeout, namespace, name)
+	return nil, fmt.Errorf("timed out after %v when waiting for pod %v/%v to start", timeout, namespace, name)
 }
 
 func RunPodAndGetNodeName(c clientset.Interface, pod *v1.Pod, timeout time.Duration) (string, error) {
@@ -122,8 +122,8 @@ type RCConfig struct {
 	Timeout           time.Duration
 	PodStatusFile     *os.File
 	Replicas          int
-	CpuRequest        int64 // millicores
-	CpuLimit          int64 // millicores
+	CPURequest        int64 // millicores
+	CPULimit          int64 // millicores
 	MemRequest        int64 // bytes
 	MemLimit          int64 // bytes
 	GpuLimit          int64 // count
@@ -177,9 +177,9 @@ type RCConfig struct {
 	ServiceAccountTokenProjections int
 }
 
-func (rc *RCConfig) RCConfigLog(fmt string, args ...interface{}) {
-	if rc.LogFunc != nil {
-		rc.LogFunc(fmt, args...)
+func (config *RCConfig) RCConfigLog(fmt string, args ...interface{}) {
+	if config.LogFunc != nil {
+		config.LogFunc(fmt, args...)
 	}
 	klog.Infof(fmt, args...)
 }
@@ -646,20 +646,20 @@ func (config *RCConfig) applyTo(template *v1.PodTemplateSpec) {
 			c.Ports = append(c.Ports, v1.ContainerPort{Name: k, ContainerPort: int32(v), HostPort: int32(v)})
 		}
 	}
-	if config.CpuLimit > 0 || config.MemLimit > 0 || config.GpuLimit > 0 {
+	if config.CPULimit > 0 || config.MemLimit > 0 || config.GpuLimit > 0 {
 		template.Spec.Containers[0].Resources.Limits = v1.ResourceList{}
 	}
-	if config.CpuLimit > 0 {
-		template.Spec.Containers[0].Resources.Limits[v1.ResourceCPU] = *resource.NewMilliQuantity(config.CpuLimit, resource.DecimalSI)
+	if config.CPULimit > 0 {
+		template.Spec.Containers[0].Resources.Limits[v1.ResourceCPU] = *resource.NewMilliQuantity(config.CPULimit, resource.DecimalSI)
 	}
 	if config.MemLimit > 0 {
 		template.Spec.Containers[0].Resources.Limits[v1.ResourceMemory] = *resource.NewQuantity(config.MemLimit, resource.DecimalSI)
 	}
-	if config.CpuRequest > 0 || config.MemRequest > 0 {
+	if config.CPURequest > 0 || config.MemRequest > 0 {
 		template.Spec.Containers[0].Resources.Requests = v1.ResourceList{}
 	}
-	if config.CpuRequest > 0 {
-		template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = *resource.NewMilliQuantity(config.CpuRequest, resource.DecimalSI)
+	if config.CPURequest > 0 {
+		template.Spec.Containers[0].Resources.Requests[v1.ResourceCPU] = *resource.NewMilliQuantity(config.CPURequest, resource.DecimalSI)
 	}
 	if config.MemRequest > 0 {
 		template.Spec.Containers[0].Resources.Requests[v1.ResourceMemory] = *resource.NewQuantity(config.MemRequest, resource.DecimalSI)
@@ -839,7 +839,7 @@ func (config *RCConfig) start() error {
 	return nil
 }
 
-// Simplified version of RunRC, that does not create RC, but creates plain Pods.
+// StartPods is a simplified version of RunRC, that does not create RC, but creates plain Pods.
 // Optionally waits for pods to start running (if waitForRunning == true).
 // The number of replicas must be non-zero.
 func StartPods(c clientset.Interface, replicas int, namespace string, podNamePrefix string,
@@ -870,14 +870,14 @@ func StartPods(c clientset.Interface, replicas int, namespace string, podNamePre
 	return nil
 }
 
-// Wait up to 10 minutes for all matching pods to become Running and at least one
+// WaitForPodsWithLabelRunning will wait up to 10 minutes for all matching pods to become Running and at least one
 // matching pod exists.
 func WaitForPodsWithLabelRunning(c clientset.Interface, ns string, label labels.Selector) error {
 	return WaitForEnoughPodsWithLabelRunning(c, ns, label, -1)
 }
 
-// Wait up to 10 minutes for at least 'replicas' many pods to be Running and at least
-// one matching pod exists. If 'replicas' is < 0, wait for all matching pods running.
+// WaitForEnoughPodsWithLabelRunning will wait up to 10 minutes for at least 'replicas' many pods to be Running and at
+// least one matching pod exists. If 'replicas' is < 0, wait for all matching pods running.
 func WaitForEnoughPodsWithLabelRunning(c clientset.Interface, ns string, label labels.Selector, replicas int) error {
 	running := false
 	ps, err := NewPodStore(c, ns, label, fields.Everything())

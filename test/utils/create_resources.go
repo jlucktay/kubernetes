@@ -39,7 +39,7 @@ const (
 	retryBackoffSteps           = 6
 )
 
-// Utility for retrying the given function with exponential backoff.
+// RetryWithExponentialBackOff is a utility for retrying the given function with exponential backoff.
 func RetryWithExponentialBackOff(fn wait.ConditionFunc) error {
 	backoff := wait.Backoff{
 		Duration: retryBackoffInitialDuration,
@@ -50,6 +50,7 @@ func RetryWithExponentialBackOff(fn wait.ConditionFunc) error {
 	return wait.ExponentialBackoff(backoff, fn)
 }
 
+// IsRetryableAPIError indicates whether an error is transient or explicitly confirms that we should retry.
 func IsRetryableAPIError(err error) bool {
 	// These errors may indicate a transient error that we can retry in tests.
 	if apierrs.IsInternalError(err) || apierrs.IsTimeout(err) || apierrs.IsServerTimeout(err) ||
@@ -63,6 +64,7 @@ func IsRetryableAPIError(err error) bool {
 	return false
 }
 
+// CreatePodWithRetries retries creation of a Pod based around the given inputs using exponential backoff.
 func CreatePodWithRetries(c clientset.Interface, namespace string, obj *v1.Pod) error {
 	if obj == nil {
 		return fmt.Errorf("Object provided to create is empty")
@@ -80,6 +82,8 @@ func CreatePodWithRetries(c clientset.Interface, namespace string, obj *v1.Pod) 
 	return RetryWithExponentialBackOff(createFunc)
 }
 
+// CreateRCWithRetries retries creation of a ReplicationController based around the given inputs using exponential
+// backoff.
 func CreateRCWithRetries(c clientset.Interface, namespace string, obj *v1.ReplicationController) error {
 	if obj == nil {
 		return fmt.Errorf("Object provided to create is empty")
@@ -97,6 +101,8 @@ func CreateRCWithRetries(c clientset.Interface, namespace string, obj *v1.Replic
 	return RetryWithExponentialBackOff(createFunc)
 }
 
+// CreateReplicaSetWithRetries retries creation of a ReplicaSet based around the given inputs using exponential
+// backoff.
 func CreateReplicaSetWithRetries(c clientset.Interface, namespace string, obj *apps.ReplicaSet) error {
 	if obj == nil {
 		return fmt.Errorf("Object provided to create is empty")
@@ -114,6 +120,8 @@ func CreateReplicaSetWithRetries(c clientset.Interface, namespace string, obj *a
 	return RetryWithExponentialBackOff(createFunc)
 }
 
+// CreateDeploymentWithRetries retries creation of a Deployment based around the given inputs using exponential
+// backoff.
 func CreateDeploymentWithRetries(c clientset.Interface, namespace string, obj *apps.Deployment) error {
 	if obj == nil {
 		return fmt.Errorf("Object provided to create is empty")
@@ -131,6 +139,7 @@ func CreateDeploymentWithRetries(c clientset.Interface, namespace string, obj *a
 	return RetryWithExponentialBackOff(createFunc)
 }
 
+// CreateDaemonSetWithRetries retries creation of a DaemonSet based around the given inputs using exponential backoff.
 func CreateDaemonSetWithRetries(c clientset.Interface, namespace string, obj *apps.DaemonSet) error {
 	if obj == nil {
 		return fmt.Errorf("Object provided to create is empty")
@@ -148,6 +157,7 @@ func CreateDaemonSetWithRetries(c clientset.Interface, namespace string, obj *ap
 	return RetryWithExponentialBackOff(createFunc)
 }
 
+// CreateJobWithRetries retries creation of a Job based around the given inputs using exponential backoff.
 func CreateJobWithRetries(c clientset.Interface, namespace string, obj *batch.Job) error {
 	if obj == nil {
 		return fmt.Errorf("Object provided to create is empty")
@@ -165,6 +175,7 @@ func CreateJobWithRetries(c clientset.Interface, namespace string, obj *batch.Jo
 	return RetryWithExponentialBackOff(createFunc)
 }
 
+// CreateSecretWithRetries retries creation of a Secret based around the given inputs using exponential backoff.
 func CreateSecretWithRetries(c clientset.Interface, namespace string, obj *v1.Secret) error {
 	if obj == nil {
 		return fmt.Errorf("Object provided to create is empty")
@@ -182,6 +193,7 @@ func CreateSecretWithRetries(c clientset.Interface, namespace string, obj *v1.Se
 	return RetryWithExponentialBackOff(createFunc)
 }
 
+// CreateConfigMapWithRetries retries creation of a ConfigMap based around the given inputs using exponential backoff.
 func CreateConfigMapWithRetries(c clientset.Interface, namespace string, obj *v1.ConfigMap) error {
 	if obj == nil {
 		return fmt.Errorf("Object provided to create is empty")
@@ -199,6 +211,7 @@ func CreateConfigMapWithRetries(c clientset.Interface, namespace string, obj *v1
 	return RetryWithExponentialBackOff(createFunc)
 }
 
+// CreateServiceWithRetries retries creation of a Service based around the given inputs using exponential backoff.
 func CreateServiceWithRetries(c clientset.Interface, namespace string, obj *v1.Service) error {
 	if obj == nil {
 		return fmt.Errorf("Object provided to create is empty")
@@ -216,6 +229,8 @@ func CreateServiceWithRetries(c clientset.Interface, namespace string, obj *v1.S
 	return RetryWithExponentialBackOff(createFunc)
 }
 
+// CreateResourceQuotaWithRetries retries creation of a ResourceQuota based around the given inputs using exponential
+// backoff.
 func CreateResourceQuotaWithRetries(c clientset.Interface, namespace string, obj *v1.ResourceQuota) error {
 	if obj == nil {
 		return fmt.Errorf("Object provided to create is empty")

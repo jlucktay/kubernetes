@@ -52,7 +52,7 @@ func UpdateReplicaSetWithRetries(c clientset.Interface, namespace, name string, 
 	return rs, pollErr
 }
 
-// Verify .Status.Replicas is equal to .Spec.Replicas
+// WaitRSStable will verify .Status.Replicas is equal to .Spec.Replicas
 func WaitRSStable(t *testing.T, clientSet clientset.Interface, rs *apps.ReplicaSet, pollInterval, pollTimeout time.Duration) error {
 	desiredGeneration := rs.Generation
 	if err := wait.PollImmediate(pollInterval, pollTimeout, func() (bool, error) {
